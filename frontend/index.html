@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Sistema de Predicción</title>
+    <style>
+        body { font-family: sans-serif; text-align: center; padding: 50px; background: #f4f4f4; }
+        .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); display: inline-block; }
+        button { background: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; margin-top: 10px;}
+        button:hover { background: #0056b3; }
+        #resultado { margin-top: 20px; font-weight: bold; font-size: 1.2em; color: #333; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>Predicción de Energía</h1>
+        <p>Pulsa para solicitar una predicción al sistema distribuido.</p>
+        <button onclick="pedirPrediccion()">Realizar Predicción</button>
+        <div id="resultado"></div>
+    </div>
+
+    <script>
+        async function pedirPrediccion() {
+            const resDiv = document.getElementById('resultado');
+            resDiv.innerHTML = "Procesando...";
+            try {
+                // Llamar al Orquestador (Puerto 8080)
+                const response = await fetch('http://localhost:8080/run', { method: 'POST' });
+                const data = await response.json();
+                resDiv.innerHTML = `Resultado: ${data.prediction.toFixed(2)} kWh`;
+            } catch (err) {
+                resDiv.innerHTML = "Error de conexión";
+                console.error(err);
+            }
+        }
+    </script>
+</body>
+</html>

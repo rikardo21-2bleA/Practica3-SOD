@@ -1,0 +1,65 @@
+services:
+  # 1. Base de Datos (MongoDB)
+  mongo:
+    image: mongo:7.0
+    container_name: mongo
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+
+  # 2. Servicio de Predicción (IA)
+  predict:
+    build: ./predict
+    container_name: predict
+    restart: unless-stopped
+    ports:
+      - "3002:3002"
+    environment:
+      - PORT=3002
+      - MODEL_DIR=./model
+      # Conecta con Mongo usando el nombre del servicio 'mongo'
+      - MONGO_URI=mongodb://mongo:27017/prediction
+    depends_on:
+      - mongo
+
+  # 3. Servicio de Adquisición (Datos)
+  acquire:
+    build: ./acquire
+    container_name: acquire
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    environment:
+      - PORT=3001
+      - MONGO_URI=mongodb://mongo:27017/prediction
+    depends_on:
+      - mongo
+
+  # 4. El Jefe (Orquestador)
+  orchestrator:
+    build: ./orchestrator
+    container_name: orchestrator
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      - PORT=8080
+      # Aquí le decimos dónde están sus compañeros en la red Docker
+      - ACQUIRE_URL=http://acquire:3001
+      - PREDICT_URL=http://predict:3002
+    depends_on:
+      - acquire
+      - predict
+  
+  # Visual (UI)
+  frontend:
+    build: ./frontend
+    container_name: frontend
+    ports:
+      - "80:80"
+
+# Persistencia de datos para que no se borre la BD al reiniciar
+volumes:
+  mongo-data:
