@@ -20,7 +20,7 @@ services:
       - PORT=3002
       - MODEL_DIR=./model
       # Conecta con Mongo usando el nombre del servicio 'mongo'
-      - MONGO_URI=mongodb://mongo:27017/prediction
+      - MONGO_URI=mongodb://mongo:27017/predict_db
     depends_on:
       - mongo
 
@@ -33,7 +33,7 @@ services:
       - "3001:3001"
     environment:
       - PORT=3001
-      - MONGO_URI=mongodb://mongo:27017/prediction
+      - MONGO_URI=mongodb://mongo:27017/acquire_db
     depends_on:
       - mongo
 
